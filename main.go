@@ -57,8 +57,16 @@ func WalkJSON(path string, jsonData interface{}, receiver Receiver) {
 	}
 }
 
-func doProbe(client *http.Client, target string) (interface{}, error) {
-	resp, err := client.Get(target)
+func doProbe(client *http.Client, target string, auth string) (interface{}, error) {
+	req, err := http.NewRequest("GET", target, nil)
+	if err != nil {
+		return nil, err
+	}
+	if auth != "" {
+		req.Header.Set("Authorization", auth)
+	}
+	// resp, err := client.Get(target)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +110,7 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 
 	prefix := params.Get("prefix")
 
-	jsonData, err := doProbe(httpClient, target)
+	jsonData, err := doProbe(httpClient, target, r.Header.Get("Authorization"))
 	if err != nil {
 		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
