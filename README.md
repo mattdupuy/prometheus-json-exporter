@@ -8,7 +8,7 @@ Installation
 --------------------
 
 ```
-$ go get github.com/shiroyagicorp/prometheus-json-exporter
+$ go get github.com/preved911/prometheus-json-exporter
 ```
 
 Example Usage
@@ -38,11 +38,6 @@ size 1
 # TYPE validate gauge
 validate 1
 ```
-
-Note
-----------
-
-This repository is a fork of https://github.com/tolleiv/json-exporter
 
 License
 ----------
