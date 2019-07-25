@@ -1,3 +1,16 @@
 language: go
 
 go: 1.12
+
+install:
+  - go get -v .
+  - go build .
+
+deploy:
+  provider: releases
+  api_key:
+    secure: 40a2cfa5e4c75121a14a65909ca1455672eb7a97
+  file: prometheus-json-exporter
+  skip_cleanup: true
+  on:
+    tags: true
