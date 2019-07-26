@@ -11,6 +11,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/yalp/jsonpath"
 )
 
 type ReceiverFunc func(key string, value float64)
@@ -42,12 +44,12 @@ func WalkJSON(path string, jsonData interface{}, receiver Receiver) {
 	case []interface{}:
 		prefix := path + "__"
 		for i, x := range v {
-			WalkJSON(fmt.Sprintf("%s%d", prefix, i), x, receiver)
+      WalkJSON(fmt.Sprintf("%s%d", prefix, i), x, receiver)
 		}
 	case map[string]interface{}:
 		prefix := ""
 		if path != "" {
-			prefix = path + "::"
+			prefix = path + "_"
 		}
 		for k, x := range v {
 			WalkJSON(fmt.Sprintf("%s%s", prefix, k), x, receiver)
@@ -65,7 +67,6 @@ func doProbe(client *http.Client, target string, auth string) (interface{}, erro
 	if auth != "" {
 		req.Header.Set("Authorization", auth)
 	}
-	// resp, err := client.Get(target)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -102,20 +103,30 @@ func init() {
 func probeHandler(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 
+	prefix := params.Get("prefix")
+
 	target := params.Get("target")
 	if target == "" {
 		http.Error(w, "Target parameter is missing", http.StatusBadRequest)
 		return
 	}
 
-	prefix := params.Get("prefix")
-
 	jsonData, err := doProbe(httpClient, target, r.Header.Get("Authorization"))
 	if err != nil {
 		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	// log.Printf("Retrieved value %v", jsonData)
+
+	lookuppath := params.Get("jsonpath")
+	if lookuppath != "" {
+		jsonPath, err := jsonpath.Read(jsonData, lookuppath)
+		if err != nil {
+			http.Error(w, "Jsonpath not found", http.StatusNotFound)
+			return
+		}
+		log.Printf("Found value %v", jsonPath)
+		jsonData = jsonPath
+	}
 
 	registry := prometheus.NewRegistry()
 
