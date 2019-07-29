@@ -8,8 +8,7 @@ install:
 
 deploy:
   provider: releases
-  api_key:
-    secure: 81d9a9e071c03cbbcd4d5240e8e353f71b2821b4
+  github_token: $GITHUB_TOKEN
   file: prometheus-json-exporter
   skip_cleanup: true
   on:
