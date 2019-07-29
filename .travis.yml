@@ -9,7 +9,7 @@ install:
 deploy:
   provider: releases
   api_key:
-    secure: 214e82a4e460ee29067e94bbf1d34829016e3aaa
+    secure: efb6284ddb3d2e353db142f9cfda5b4df092d223
   file: prometheus-json-exporter
   skip_cleanup: true
   on:
