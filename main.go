@@ -44,7 +44,7 @@ func WalkJSON(path string, jsonData interface{}, receiver Receiver) {
 	case []interface{}:
 		prefix := path + "__"
 		for i, x := range v {
-      WalkJSON(fmt.Sprintf("%s%d", prefix, i), x, receiver)
+			WalkJSON(fmt.Sprintf("%s%d", prefix, i), x, receiver)
 		}
 	case map[string]interface{}:
 		prefix := ""
@@ -101,6 +101,8 @@ func init() {
 }
 
 func probeHandler(w http.ResponseWriter, r *http.Request) {
+	registry := prometheus.NewRegistry()
+
 	params := r.URL.Query()
 
 	prefix := params.Get("prefix")
@@ -114,35 +116,40 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 	jsonData, err := doProbe(httpClient, target, r.Header.Get("Authorization"))
 	if err != nil {
 		log.Print(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	lookuppath := params.Get("jsonpath")
-	if lookuppath != "" {
-		jsonPath, err := jsonpath.Read(jsonData, lookuppath)
-		if err != nil {
-			http.Error(w, "Jsonpath not found", http.StatusNotFound)
-			return
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		promGaugeGenerate(registry, prefix, "up", "Json API Up status", 0)
+	} else {
+		lookuppath := params.Get("jsonpath")
+		if lookuppath != "" {
+			jsonPath, err := jsonpath.Read(jsonData, lookuppath)
+			if err != nil {
+				http.Error(w, "Jsonpath not found", http.StatusNotFound)
+				return
+			}
+			log.Printf("Found value %v", jsonPath)
+			jsonData = jsonPath
 		}
-		log.Printf("Found value %v", jsonPath)
-		jsonData = jsonPath
+
+		WalkJSON("", jsonData, ReceiverFunc(func(key string, value float64) {
+			promGaugeGenerate(registry, prefix, key, "Retrieved value", value)
+		}))
+
+		promGaugeGenerate(registry, prefix, "up", "Json API Up status", 1)
 	}
-
-	registry := prometheus.NewRegistry()
-
-	WalkJSON("", jsonData, ReceiverFunc(func(key string, value float64) {
-		g := prometheus.NewGauge(
-			prometheus.GaugeOpts{
-				Name: prefix + key,
-				Help: "Retrieved value",
-			},
-		)
-		registry.MustRegister(g)
-		g.Set(value)
-	}))
 
 	h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 	h.ServeHTTP(w, r)
+}
+
+func promGaugeGenerate(registry *prometheus.Registry, prefix, key, help string, value float64) {
+	g := prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Name: prefix + key,
+			Help: help,
+		},
+	)
+	registry.MustRegister(g)
+	g.Set(value)
 }
 
 var indexHTML = []byte(`<html>
