@@ -2,7 +2,7 @@ FROM golang:1.10 as builder
 
 ENV CGO_ENABLED=0
 ENV GOOS=linux
-ENV GOARCH=amd64
+ENV GOARCH=arm64
 
 RUN go get -u github.com/golang/dep/...
 
