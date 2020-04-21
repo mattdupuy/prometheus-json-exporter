@@ -1,4 +1,4 @@
-prometheus-json-exporter [![Build Status](https://travis-ci.com/konikvranik/prometheus-json-exporter.svg?branch=master)](https://travis-ci.com/preved911/prometheus-json-exporter)
+prometheus-json-exporter [![Build Status](https://travis-ci.com/konikvranik/prometheus-json-exporter.svg?branch=master)](https://travis-ci.com/konikvranik/prometheus-json-exporter)
 ==============================
 
 A prometheus exporter which fetches arbitrary JSON from remote API and
