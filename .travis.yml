@@ -9,11 +9,14 @@ arch:
 install:
   - go get -v .
   - go build .
+  - pwd
+  - ls -ltra *
 
 deploy:
-  provider: releases
-  api_key: $GITHUB_OAUTH
-  file: prometheus-json-exporter
-  skip_cleanup: true
-  on:
-    tags: true
+  - provider: releases
+    skip_cleanup: true
+    api_key: $GITHUB_OAUTH
+    file: prometheus-json-exporter
+    overwrite: true
+    on:
+      tags: true
