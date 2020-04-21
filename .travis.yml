@@ -9,8 +9,7 @@ arch:
 install:
   - go get -v .
   - go build .
-  - pwd
-  - ls -ltra *
+  - mv prometheus-json-exporter "prometheus-json-exporter_$TRAVIS_CPU_ARCH"
 
 deploy:
   - provider: releases
