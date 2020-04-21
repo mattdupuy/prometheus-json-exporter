@@ -2,6 +2,10 @@ language: go
 
 go: 1.14.2
 
+arch:
+  - amd64
+  - arm64
+
 install:
   - go get -v .
   - go build .
