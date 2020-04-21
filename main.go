@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -131,7 +132,7 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		WalkJSON("", jsonData, ReceiverFunc(func(key string, value float64) {
-			promGaugeGenerate(registry, prefix, key, "Retrieved value", value)
+			promGaugeGenerate(registry, prefix, sanitizeKey(key), "Retrieved value", value)
 		}))
 
 		promGaugeGenerate(registry, prefix, "up", "Json API Up status", 1)
@@ -139,6 +140,14 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 
 	h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 	h.ServeHTTP(w, r)
+}
+
+func sanitizeKey(key string) string {
+	r := strings.NewReplacer(
+		" ", "_",
+		"/", "_",
+		":", "_")
+	return r.Replace(key)
 }
 
 func promGaugeGenerate(registry *prometheus.Registry, prefix, key, help string, value float64) {
