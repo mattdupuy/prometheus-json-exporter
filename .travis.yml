@@ -15,7 +15,7 @@ deploy:
   - provider: releases
     skip_cleanup: true
     api_key: $GITHUB_OAUTH
-    file: prometheus-json-exporter
+    file: prometheus-json-exporter_$TRAVIS_CPU_ARCH
     overwrite: true
     on:
       tags: true
