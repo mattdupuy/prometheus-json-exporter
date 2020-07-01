@@ -61,7 +61,11 @@ func WalkJSON(path string, jsonData interface{}, receiver Receiver) {
 	}
 }
 
-func doOvhProbe(client *ovh.Client, target string) (interface{}, error){
+func doOvhProbe(target string) (interface{}, error){
+	ovhClient, err = &ovh.NewEndpointClient("ovh-eu")
+	if err != nil {
+		fmt.Printf("Error: %q\n", err)
+	}
 	
 	// call get function
 	bytes := []byte{}
@@ -80,15 +84,6 @@ func doOvhProbe(client *ovh.Client, target string) (interface{}, error){
 	return jsonData, nil
 }
 
-var ovhClient *ovh.Client
-
-func init() {
-	ovhClient, err = &ovh.NewEndpointClient("ovh-eu")
-	if err != nil {
-		fmt.Printf("Error: %q\n", err)
-	}
-}
-
 func ovhProbeHandler(w http.ResponseWriter, r *http.Request) {
 	registry := prometheus.NewRegistry()
 
@@ -102,7 +97,7 @@ func ovhProbeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonData, err := doOvhProbe(ovhClient, target)
+	jsonData, err := doOvhProbe(target)
 	if err != nil {
 		log.Print(err)
 		// http.Error(w, err.Error(), http.StatusInternalServerError)
