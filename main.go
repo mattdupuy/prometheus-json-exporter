@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/tls"
+	//"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -63,16 +63,10 @@ func WalkJSON(path string, jsonData interface{}, receiver Receiver) {
 
 func doOvhProbe(client *ovh.Client, target string) (interface{}, error){
 	
-	// Get all the xdsl services
-	xdslServices := []string{}
-	resp, err := client.Get(string)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+	// call get function
+	bytes := []byte{}
+	if err := client.Get("/xdsl/", &bytes); err != nil {
+		fmt.Printf("Error: %q\n", err)
 		return nil, err
 	}
 
