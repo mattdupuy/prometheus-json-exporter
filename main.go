@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	//"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -65,7 +65,8 @@ func doOvhProbe(client *ovh.Client, target string) (interface{}, error){
 	
 	// call get function
 	bytes := []byte{}
-	if err := client.Get("/xdsl/", &bytes); err != nil {
+	err := client.Get(target, &bytes)
+	if err != nil {
 		fmt.Printf("Error: %q\n", err)
 		return nil, err
 	}
