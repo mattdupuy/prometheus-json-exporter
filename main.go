@@ -101,7 +101,7 @@ func ovhProbeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonData, err := doProbe(httpClient, target, r.Header.Get("Authorization"))
+	jsonData, err := doOvhProbe(ovhClient, target)
 	if err != nil {
 		log.Print(err)
 		// http.Error(w, err.Error(), http.StatusInternalServerError)
