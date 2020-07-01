@@ -70,7 +70,7 @@ func doOvhProbe(target string) (interface{}, error){
 	
 	// call get function
 	bytes := []byte{}
-	err := ovhClient.Get(target, &bytes)
+	err = ovhClient.Get(target, &bytes)
 	if err != nil {
 		fmt.Printf("Error: %q\n", err)
 		return nil, err
