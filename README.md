@@ -8,7 +8,7 @@ Installation
 --------------------
 
 ```
-$ go get github.com/konikvranik/prometheus-json-exporter
+$ go get github.com/mattdupuy/prometheus-json-exporter
 ```
 
 Example Usage
