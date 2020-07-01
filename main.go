@@ -14,6 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/yalp/jsonpath"
+	"github.com/ovh/go-ovh/ovh"
 )
 
 type ReceiverFunc func(key string, value float64)
@@ -60,15 +61,11 @@ func WalkJSON(path string, jsonData interface{}, receiver Receiver) {
 	}
 }
 
-func doProbe(client *http.Client, target string, auth string) (interface{}, error) {
-	req, err := http.NewRequest("GET", target, nil)
-	if err != nil {
-		return nil, err
-	}
-	if auth != "" {
-		req.Header.Set("Authorization", auth)
-	}
-	resp, err := client.Do(req)
+func doOvhProbe(client *ovh.Client, target string) (interface{}, error){
+	
+	// Get all the xdsl services
+	xdslServices := []string{}
+	resp, err := client.Get(string)
 	if err != nil {
 		return nil, err
 	}
@@ -88,27 +85,23 @@ func doProbe(client *http.Client, target string, auth string) (interface{}, erro
 	return jsonData, nil
 }
 
-var httpClient *http.Client
+var ovhClient *ovh.Client
 
 func init() {
-	httpClient = &http.Client{
-		Transport: &http.Transport{
-			MaxIdleConns: 100,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
+	ovhClient, err := ovh.NewEndpointClient("ovh-eu")
+	if err != nil {
+		fmt.Printf("Error: %q\n", err)
 	}
 }
 
-func probeHandler(w http.ResponseWriter, r *http.Request) {
+func ovhProbeHandler(w http.ResponseWriter, r *http.Request) {
 	registry := prometheus.NewRegistry()
 
 	params := r.URL.Query()
 
 	prefix := params.Get("prefix")
 
-	target := params.Get("target")
+	target := params.Get("ovhTarget")
 	if target == "" {
 		http.Error(w, "Target parameter is missing", http.StatusBadRequest)
 		return
@@ -165,7 +158,7 @@ var indexHTML = []byte(`<html>
 <head><title>Json Exporter</title></head>
 <body>
 <h1>Json Exporter</h1>
-<p><a href="/probe">Run a probe</a></p>
+<p><a href="/ovhprobe">Run OVH probe</a></p>
 <p><a href="/metrics">Metrics</a></p>
 </body>
 </html>`)
@@ -177,7 +170,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(indexHTML)
 	})
-	http.HandleFunc("/probe", probeHandler)
+	http.HandleFunc("/ovhprobe", ovhProbeHandler)
 	http.Handle("/metrics", promhttp.Handler())
 
 	log.Printf("listenning on %s", *addr)
