@@ -83,7 +83,7 @@ func doOvhProbe(client *ovh.Client, target string) (interface{}, error){
 var ovhClient *ovh.Client
 
 func init() {
-	ovhClient, err := ovh.NewEndpointClient("ovh-eu")
+	ovhClient, err = &ovh.NewEndpointClient("ovh-eu")
 	if err != nil {
 		fmt.Printf("Error: %q\n", err)
 	}
