@@ -62,19 +62,19 @@ func WalkJSON(path string, jsonData interface{}, receiver Receiver) {
 }
 
 func doOvhProbe(target string) (interface{}, error){
-	ovhClient, err = &ovh.NewEndpointClient("ovh-eu")
+	ovhClient, err :=ovh.NewEndpointClient("ovh-eu")
+	
 	if err != nil {
 		fmt.Printf("Error: %q\n", err)
 	}
 	
 	// call get function
 	bytes := []byte{}
-	err := client.Get(target, &bytes)
+	err := ovhClient.Get(target, &bytes)
 	if err != nil {
 		fmt.Printf("Error: %q\n", err)
 		return nil, err
 	}
-
 	var jsonData interface{}
 	err = json.Unmarshal([]byte(bytes), &jsonData)
 	if err != nil {
